@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="pos_payment_pax_view_tree" model="ir.ui.view">
+        <field name="name">pos_payment_pax.view.tree</field>
+        <field name="model">pos.payment</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_tree" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='amount']" position="after">
+                <field name="pax_terminalid" optional="show"/>
+                
+            </xpath>
+        </field>
+    </record>
+    <record id="pos_payment_pax_view_form" model="ir.ui.view">
+        <field name="name">pos_payment_pax.view.form</field>
+        <field name="model">pos.payment</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_payment_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//form/sheet/group" position="after">
+                <field name="payment_method_id" invisible="1"/>
+                <field name="use_payment_terminal" invisible="1"/>
+                <group string="PAX" name="pax" readonly="1" attrs="{'invisible':[('use_payment_terminal','!=','pax')]}">
+                    <field name="pax_terminalid" />
+                    <field name="entry_mode" />
+                    <field name="merchantid" />
+                    <field name="signature_required" />
+                    <field name="payment_log" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

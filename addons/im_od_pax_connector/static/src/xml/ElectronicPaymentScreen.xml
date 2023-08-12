@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="PaymentScreenElectronicPayment" t-inherit="point_of_sale.PaymentScreenElectronicPayment" t-inherit-mode="extension" owl="1">
+<xpath expr="//div[@class='paymentline electronic_payment']" position="attributes">
+    <attribute name="t-if">(props.line and props.line.payment_method.use_payment_terminal!='pax') or (props.line and props.line.payment_method.use_payment_terminal=='pax' and env.pos.ECRTerminal.is_selected())</attribute>
+</xpath>
+<xpath  expr="//div[@class='paymentline electronic_payment']" position="after">
+    <div t-if="props.line and props.line.payment_method.use_payment_terminal=='pax' and !env.pos.ECRTerminal.is_selected()" class="paymentline electronic_payment">
+        <div>
+            Initialize
+        </div>
+        <div class="button initialize_pax highlight" title="Initialize device" t-on-click="trigger('init_device', props.line)">
+            Init
+        </div>
+    </div>
+</xpath>
+    </t>
+</templates>

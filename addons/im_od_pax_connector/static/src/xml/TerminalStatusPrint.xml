@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="TerminalStatusPrint"  owl="1">
+            <div class="pos-receipt">
+                <t t-foreach="printarray" t-as="val">
+                    <div t-esc="val[0]" />
+                    <div class="pos-receipt-left-padding">
+                        <t t-esc="val[1]" />
+                    </div>
+                </t>
+            </div>
+    </t>
+</templates>

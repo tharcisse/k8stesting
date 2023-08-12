@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="PaymentScreen" t-inherit="point_of_sale.PaymentScreen" t-inherit-mode="extension" owl="1">
+
+        <xpath expr="//div[@class='paymentmethods']" position="after">
+            <div class="pos-receipt-container">
+                <div class="TerminalStatusPrint" t-ref="terminal_state" >
+                    <t t-foreach="paxPaymentLines" t-as="paxline"
+                    t-key="paxline.id">
+                        <TerminalStatusPrint line="paxline" />
+                    </t>
+                </div>
+            </div>
+        </xpath>
+        </t>
+        </templates>

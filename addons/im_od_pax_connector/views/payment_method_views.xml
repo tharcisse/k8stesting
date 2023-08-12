@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="pos_payment_method_view_form" model="ir.ui.view">
+        <field name="name">pos_payment_method.view.form</field>
+        <field name="model">pos.payment.method</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='use_payment_terminal']" position="after">
+                <field name="pax_device_brand" attrs="{'invisible': [('use_payment_terminal', '!=', 'pax')], 'required': [('use_payment_terminal', '=', 'pax')]}"/>
+                <field name="show_details" attrs="{'invisible': [('use_payment_terminal', '!=', 'pax')], 'required': [('use_payment_terminal', '=', 'pax')]}"/>
+                <field name="print" attrs="{'invisible': [('use_payment_terminal', '!=', 'pax')], 'required': [('use_payment_terminal', '=', 'pax')]}"/>
+                <field name="subtype" attrs="{'invisible': [('use_payment_terminal', '!=', 'pax')], 'required': [('use_payment_terminal', '=', 'pax')]}"/>
+                <field name="connection_mode" attrs="{'invisible': [('use_payment_terminal', '!=', 'pax')], 'required': [('use_payment_terminal', '=', 'pax')]}"/>
+                <field name="odoows_connector_url" attrs="{'invisible': ['|',('connection_mode','!=','websocket'),('use_payment_terminal', '!=', 'pax')], 'required': [('connection_mode','=','websocket'),('use_payment_terminal', '=', 'pax')]}"/>
+            
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

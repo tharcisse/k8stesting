@@ -1,0 +1,33 @@
+{
+    "data": {
+        "adjAmt": "3940",
+        "aid": "A0000000031010",
+        "amt": "3940",
+        "appCode": "180524",
+        "appLabel": "Visa Credit",
+        "atc": "002B",
+        "batchNo": "1",
+        "cardType": "VISA",
+        "ecrRef": "00003-053-0007",
+        "entryMode": "T",
+        "expData": "2702",
+        "merchantAddress": "Address Line 1 \r\nAddress Line 2 \r\n    ",
+        "merchantID": "T33000344140",
+        "merchantName": "Merchant Name",
+        "noSign": "Y",
+        "pan": "420184******6441",
+        "referenceNo": "230609180524",
+        "status": "A",
+        "stt": "Y",
+        "tc": "680ED8ADB081A46D",
+        "terminalId": "23000222",
+        "traceNo": "7",
+        "transState": "normal",
+        "transType": "sale",
+        "tsi": "0000",
+        "tvr": "0000000000",
+        "txnDate": "20230609",
+        "txnTime": "1805"
+    },
+    "dataType": "sale"
+}
