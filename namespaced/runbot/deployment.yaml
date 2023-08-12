@@ -1,0 +1,98 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo
+  annotations:
+    runboat/init-status: "todo"  # ask controller to initialize when there is capacity
+  finalizers:
+    - runboat/cleanup
+spec:
+  replicas: 0  # deploy idle
+  selector:
+    matchLabels:
+      app: odoo
+  template:
+    metadata:
+      labels:
+        app: odoo
+      annotations:
+        kubectl.kubernetes.io/default-container: odoo
+    spec:
+      # let Odoo stop gracefully to disconnect from postgres
+      terminationGracePeriodSeconds: 10
+      enableServiceLinks: false
+      containers:
+        - name: odoo
+          image: odoo
+          volumeMounts:
+            - name: runboat-scripts
+              mountPath: /runboat
+            - name: data
+              mountPath: /mnt/data
+            - name: data
+              mountPath: /opt/odoo-venv
+              subPath: odoo-venv
+          envFrom:
+            - secretRef:
+                name: odoosecretenv
+            - configMapRef:
+                name: odooenv
+          ports:
+            - name: web
+              containerPort: 8069
+          readinessProbe:
+            tcpSocket:
+              port: 8069
+            initialDelaySeconds: 2
+            periodSeconds: 2
+          livenessProbe:
+            tcpSocket:
+              port: 8069
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          args: ["bash", "/runboat/runboat-start.sh"]
+          resources:
+            limits:
+              cpu: 800m
+              memory: 1Gi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+        - name: mailhog
+          image: mailhog
+          env:
+            - name: MH_API_BIND_ADDR
+              value: 0.0.0.0:8025
+            - name: MH_UI_BIND_ADDR
+              value: 0.0.0.0:8025
+            - name: MH_SMTP_BIND_ADDR
+              value: 0.0.0.0:1025
+          ports:
+            - name: smtp
+              containerPort: 1025
+            - name: mailhog-web
+              containerPort: 8025
+          readinessProbe:
+            tcpSocket:
+              port: 8025
+            initialDelaySeconds: 2
+            periodSeconds: 2
+          livenessProbe:
+            tcpSocket:
+              port: 8025
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          resources:
+            limits:
+              cpu: 100m
+              memory: 200Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+      volumes:
+        - name: runboat-scripts
+          configMap:
+            name: runboat-scripts
+        - name: data
+          persistentVolumeClaim:
+            claimName: data

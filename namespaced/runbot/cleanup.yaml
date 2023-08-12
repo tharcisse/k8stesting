@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cleanup
+  labels:
+    runboat/job-kind: cleanup
+spec:
+  template:
+    metadata:
+      labels:
+        runboat/job-kind: cleanup
+    spec:
+      enableServiceLinks: false
+      containers:
+        - name: cleanup
+          image: postgres
+          volumeMounts:
+            - name: runboat-scripts
+              mountPath: /runboat
+          envFrom:
+            - secretRef:
+                name: odoosecretenv
+            - configMapRef:
+                name: odooenv
+          args: ["bash", "/runboat/runboat-cleanup.sh"]
+      volumes:
+        - name: runboat-scripts
+          configMap:
+            name: runboat-scripts
+      restartPolicy: Never
+  completions: 1
+  backoffLimit: 6

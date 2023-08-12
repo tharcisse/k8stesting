@@ -1,0 +1,28 @@
+
+#namespace: NAMESPACE
+postgres:
+  password: PG_RANDOM_PASSWORD
+  imageversion: postgres:15
+  storage: 5Gi
+  cpurequest: ""
+  cpulimit: ""
+  memoryquota: ""
+odoo: 
+  imageversion: odoo:16
+  subdomain: subdomain
+  domain: domain.com
+  extramodules: ""
+  mainrepo: ""
+  mainbranch: ""
+  mainaddonsfolder: ""
+  customgit: ""
+  customgitbranch: ""
+  maingittoke: ""
+  customgittoken: ""
+  
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80

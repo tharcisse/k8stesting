@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: addons-scripts
+  namespace: {{.Values.namespace}}
+  labels:
+    app: odoo
+data:
+{{ (.Files.Glob "scripts/requirements.sh").AsConfig | indent 2 }}
+{{ (.Files.Glob "scripts/global_addons_import.sh").AsConfig | indent 2 }}
+{{ (.Files.Glob "scripts/custom_addons_import.sh").AsConfig | indent 2 }}

@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo-deployment
+  labels:
+    app: odoo
+  namespace: {{.Values.namespace}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo
+  template:
+    metadata:
+      labels:
+        app: odoo
+    spec:
+      volumes:
+      - name: odooaddons
+        hostPath:
+          path: /odoo/addons/{{.Values.namespace}}  
+      - name: addons-scripts
+        configMap:
+          name: addons-scripts
+          defaultMode: 0777
+      containers:
+      - name: odoo
+        image: {{.Values.odoo.imageversion}}
+        volumeMounts:
+        - name: odooaddons
+          mountPath: /mnt/extra-addons
+        - name: addons-scripts
+          mountPath: /mnt/scripts
+        ports:
+        - containerPort: 8069
+        #command: ["/bin/sh", "-c"]
+        #args: ["/mnt/scripts/global_addons_import.sh;/mnt/scripts/custom_addons_import.sh;/mnt/scripts/requirements.sh"]
+        
+        env:
+        - name: HOST
+          value: postgres-service.{{.Values.namespace}}.svc
+        - name: USER
+          value: odoo
+        - name: PASSWORD
+          value: {{.Values.postgres.password}}

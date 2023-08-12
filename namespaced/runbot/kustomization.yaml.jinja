@@ -1,0 +1,84 @@
+resources:
+  {%- if mode == 'deployment' %}
+  - pvc.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress_odoo.yaml
+  - ingress_mailhog.yaml
+  {%- elif mode == "initialize" %}
+  - pvc.yaml
+  - initialize.yaml
+  {%- elif mode == "cleanup" %}
+  - cleanup.yaml
+  {%- endif %}
+
+namespace: {{ namespace }}
+
+namePrefix: "{{ build_name }}-"
+
+commonLabels:
+  runboat/build: "{{ build_name }}"
+
+commonAnnotations:
+  runboat/repo: "{{ commit_info.repo }}"
+  runboat/target-branch: "{{ commit_info.target_branch }}"
+  runboat/pr: "{{ commit_info.pr if commit_info.pr else '' }}"
+  runboat/git-commit: "{{ commit_info.git_commit }}"
+
+images:
+  - name: odoo
+    newName: "{{ image_name }}"
+    newTag: "{{ image_tag }}"
+  - name: mailhog
+    newName: "mailhog/mailhog"
+    newTag: "latest"
+
+secretGenerator:
+  - name: odoosecretenv
+    literals:
+      {%- for key, value in build_secret_env.items() %}
+      - {{ key }}={{ value }}
+      {%- endfor %}
+
+configMapGenerator:
+  - name: odooenv
+    literals:
+      - PGDATABASE={{ build_name }}
+      - ADDONS_DIR=/mnt/data/odoo-addons-dir
+      - RUNBOAT_GIT_REPO={{ commit_info.repo }}
+      - RUNBOAT_GIT_REF={{ commit_info.git_commit }}
+      {%- for key, value in build_env.items() %}
+      - {{ key }}={{ value }}
+      {%- endfor %}
+  - name: runboat-scripts
+    files:
+      - runboat-clone-and-install.sh
+      - runboat-initialize.sh
+      - runboat-cleanup.sh
+      - runboat-start.sh
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+patches:
+  - target:
+      kind: PersistentVolumeClaim
+      name: data
+    patch: |-
+      - op: replace
+        path: /spec/storageClassName
+        value: {{ build_template_vars["storageClassName"] }}
+  - target:
+      kind: Ingress
+      name: odoo
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: {{ build_slug }}.{{ build_domain }}
+  - target:
+      kind: Ingress
+      name: mailhog
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: {{ build_slug }}.mail.{{ build_domain }}
