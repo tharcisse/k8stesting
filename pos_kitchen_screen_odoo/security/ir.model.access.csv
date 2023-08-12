@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access.kitchen.screen,access.kitchen.screen,model_kitchen_screen,pos_kitchen_screen_odoo.kitchen_cook,1,1,1,1
+access.pos.custom.order,access.pos.custom.order,model_pos_custom_order,base.group_user,1,1,1,1
+access.pos.custom.order.line,access.pos.custom.order.line,model_pos_custom_order_line,base.group_user,1,1,1,1

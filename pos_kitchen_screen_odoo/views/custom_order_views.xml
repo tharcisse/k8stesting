@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="pos_custom_order_view_tree" model="ir.ui.view">
+        <field name="name">pos_custom_order.view.tree</field>
+        <field name="model">pos.custom.order</field>
+        <field name="arch" type="xml">
+            <tree string="">
+                <field name="name" />
+                <field name="date" />
+                <field name="config_id" />
+            </tree>
+        </field>
+    </record>
+    <record id="pos_custom_order_view_form" model="ir.ui.view">
+        <field name="name">pos_custom_order.view.form</field>
+        <field name="model">pos.custom.order</field>
+        <field name="arch" type="xml">
+            <form string="">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"></field>
+                        </group>
+                        <group>
+                            <field name="date" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page name="lines" string="Lines">
+                            <field name="lines" nolabel="1" readonly="1">
+                                <tree editable="bottom">
+                                    <field name="order_id" invisible="1" />
+                                    <field name="full_product_name" required="1" />
+                                    <field name="qty" required="1" />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="pos_custom_order_action" model="ir.actions.act_window">
+        <field name="name">Custom Order</field>
+        <field name="res_model">pos.custom.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
