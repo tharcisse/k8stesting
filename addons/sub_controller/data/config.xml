@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="saas_pod_code_param" model="ir.config_parameter">
+            <field name="key">saas.pod.code</field>
+            <field name="value" eval="POD_CODE" />
+        </record>
+        <record id="saas_manager_url_param" model="ir.config_parameter">
+            <field name="key">saas.manager.url</field>
+            <field name="value" eval="SAAS_MANAGER_URL" />
+        </record>
+        <record id="saas_subscription_num_param" model="ir.config_parameter">
+            <field name="key">saas.subscription.num</field>
+            <field name="value" eval="SAAS_SUBSCRIPTION_NUM" />
+        </record>
+        <record id="saas_subscription_mode_param" model="ir.config_parameter">
+            <field name="key">saas.subscription.trial</field>
+            <field name="value" eval="SAAS_SUBSCRIPTION_TRIAL" />
+        </record>
+        <record id="saas_subscription_enddate_param" model="ir.config_parameter">
+            <field name="key">saas.subscription.enddate</field>
+            <field name="value" eval="SAAS_SUBSCRIPTION_ENDATE" />
+        </record>
+    </data>
+</odoo>
