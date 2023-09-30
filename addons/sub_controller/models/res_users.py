@@ -47,11 +47,12 @@ class ResUsers(models.Model):
         config_parameter_obj_sudo = self.env["ir.config_parameter"].sudo()
         saas_url = config_parameter_obj_sudo.get_param('saas.manager.url', '')
         subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
+        pod_code= config_parameter_obj_sudo.get_param('saas.pod.code')
         headers = {
             'Content-Type': 'application/json'
         }
         if saas_url and subscription:
-            response = self._do_request('GET', saas_url+'/access_rights', payload_json={'subscription': subscription},headers=headers)
+            response = self._do_request('GET', saas_url+'/access_rights', payload_json={'subscription': subscription,'pod_code':pod_code},headers=headers)
 
     @api.model
     def update_user_count(self):
