@@ -3,23 +3,23 @@
     <data noupdate="1">
         <record id="saas_pod_code_param" model="ir.config_parameter">
             <field name="key">saas.pod.code</field>
-            <field name="value" >POD_CODE</field>
+            <field name="value">POD_CODE</field>
         </record>
         <record id="saas_manager_url_param" model="ir.config_parameter">
             <field name="key">saas.manager.url</field>
-            <field name="value" >SAAS_MANAGER_URL</field>
+            <field name="value">SAAS_MANAGER_URL</field>
         </record>
         <record id="saas_subscription_num_param" model="ir.config_parameter">
             <field name="key">saas.subscription.num</field>
-            <field name="value" >SAAS_SUBSCRIPTION_NUM</field>
+            <field name="value">SAAS_SUBSCRIPTION_NUM</field>
         </record>
         <record id="saas_subscription_mode_param" model="ir.config_parameter">
             <field name="key">saas.subscription.trial</field>
-            <field name="value"  >SAAS_SUBSCRIPTION_TRIAL</field>
+            <field name="value">SAAS_SUBSCRIPTION_TRIAL</field>
         </record>
         <record id="saas_subscription_enddate_param" model="ir.config_parameter">
             <field name="key">saas.subscription.enddate</field>
-            <field name="value"  >SAAS_SUBSCRIPTION_ENDATE</field>
+            <field name="value">SAAS_SUBSCRIPTION_ENDATE</field>
         </record>
     </data>
 </odoo>
