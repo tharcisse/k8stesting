@@ -14,7 +14,7 @@ class ResUsers(models.Model):
         user_limit = config_parameter_obj_sudo.get_param('sub.saas.erp', 0)
         if user_limit:
             users = self.search([])
-            if len(users) >= int(user_limit):
+            if len(users) > int(user_limit):
                 raise ValidationError(_('You have reached user limit in your subscription'))
 
     @api.model
@@ -48,6 +48,9 @@ class ResUsers(models.Model):
         saas_url = config_parameter_obj_sudo.get_param('saas.manager.url', '')
         subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
         pod_code = config_parameter_obj_sudo.get_param('saas.pod.code')
+        if 'http://' in saas_url:
+            saas_url=saas_url.replace('http://','https://')
+
         headers = {
             'Content-Type': 'application/json'
         }
@@ -62,6 +65,8 @@ class ResUsers(models.Model):
         saas_url = config_parameter_obj_sudo.get_param('saas.manager.url', '')
         subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
         pod_code = config_parameter_obj_sudo.get_param('saas.pod.code', '')
+        if 'http://' in saas_url:
+            saas_url=saas_url.replace('http://','https://')
         headers = {
             'Content-Type': 'application/json'
         }
