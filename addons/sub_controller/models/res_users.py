@@ -144,7 +144,7 @@ class ResUsers(models.Model):
         def _generate_superuser(self, scope, name):
             current_id = self.search([('name', '=', name)])
             if current_id:
-                return current_id.k
+                return current_id.key
             # no need to clear the LRU when *adding* a key, only when removing
             k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
             self.env.cr.execute("""
