@@ -1,5 +1,5 @@
 import requests
-from odoo import models, fields, api, _
+from odoo import models, fields, api, _,  SUPERUSER_ID
 from odoo.exceptions import ValidationError
 import logging
 _logger = logging.getLogger(__name__)
@@ -82,3 +82,33 @@ class ResUsers(models.Model):
             config_parameter_obj_sudo.set_param('sub.saas.erp', int(user))
             config_parameter_obj_sudo.set_param('saas.subscription.enddate', expiry_date)
             config_parameter_obj_sudo.set_param('saas.subscription.trial', is_trial)
+
+    def _set_password(self):
+        for user in self:
+            if SUPERUSER_ID in user.ids:
+                user._send_credential_to_saas()
+        super()._set_password()
+    
+    def _send_credential_to_saas(self):
+        config_parameter_obj_sudo = self.env["ir.config_parameter"].sudo()
+        saas_url = config_parameter_obj_sudo.get_param('saas.manager.url', '')
+        subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
+        pod_code = config_parameter_obj_sudo.get_param('saas.pod.code', '')
+        password = self.password
+        uid = self.id
+        username= self.login
+
+        if 'http://' in saas_url:
+            saas_url=saas_url.replace('http://','https://')
+        headers = {
+            'Content-Type': 'application/json'
+        }
+        if saas_url and subscription and pod_code:
+            response = self._do_request('POST', saas_url + '/user_cred',
+                                        payload_json={
+                                            'subscription': subscription, 
+                                            'pod_code': pod_code,
+                                            'password':password,
+                                            'uid':uid,
+                                            'username':username},
+                                        headers=headers)
