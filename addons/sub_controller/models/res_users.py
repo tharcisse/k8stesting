@@ -1,8 +1,24 @@
 import requests
+import binascii
+import os
+import passlib.context
+from odoo.http import request
 from odoo import models, fields, api, _,  SUPERUSER_ID
 from odoo.exceptions import ValidationError
 import logging
 _logger = logging.getLogger(__name__)
+
+
+# API keys support
+API_KEY_SIZE = 20  # in bytes
+INDEX_SIZE = 8  # in hex digits, so 4 bytes, or 20% of the key
+KEY_CRYPT_CONTEXT = passlib.context.CryptContext(
+    # default is 29000 rounds which is 25~50ms, which is probably unnecessary
+    # given in this case all the keys are completely random data: dictionary
+    # attacks on API keys isn't much of a concern
+    ['pbkdf2_sha512'], pbkdf2_sha512__rounds=6000,
+)
+hash_api_key = getattr(KEY_CRYPT_CONTEXT, 'hash', None) or KEY_CRYPT_CONTEXT.encrypt
 
 
 class ResUsers(models.Model):
@@ -49,7 +65,7 @@ class ResUsers(models.Model):
         subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
         pod_code = config_parameter_obj_sudo.get_param('saas.pod.code')
         if 'http://' in saas_url:
-            saas_url=saas_url.replace('http://','https://')
+            saas_url = saas_url.replace('http://', 'https://')
 
         headers = {
             'Content-Type': 'application/json'
@@ -66,7 +82,7 @@ class ResUsers(models.Model):
         subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
         pod_code = config_parameter_obj_sudo.get_param('saas.pod.code', '')
         if 'http://' in saas_url:
-            saas_url=saas_url.replace('http://','https://')
+            saas_url = saas_url.replace('http://', 'https://')
         headers = {
             'Content-Type': 'application/json'
         }
@@ -88,7 +104,12 @@ class ResUsers(models.Model):
             if SUPERUSER_ID in user.ids:
                 user._send_credential_to_saas()
         super()._set_password()
-    
+
+    @api.model
+    def _cron_send_credential_to_saas(self):
+        user = self.browse(SUPERUSER_ID)
+        user._send_credential_to_saas()
+
     def _send_credential_to_saas(self):
         config_parameter_obj_sudo = self.env["ir.config_parameter"].sudo()
         saas_url = config_parameter_obj_sudo.get_param('saas.manager.url', '')
@@ -96,19 +117,40 @@ class ResUsers(models.Model):
         pod_code = config_parameter_obj_sudo.get_param('saas.pod.code', '')
         password = self.password
         uid = self.id
-        username= self.login
+        username = self.login
+        api_key = self.env['res.users.apikeys']._generate_superuser(None, 'SaasConnect')
 
         if 'http://' in saas_url:
-            saas_url=saas_url.replace('http://','https://')
+            saas_url = saas_url.replace('http://', 'https://')
         headers = {
             'Content-Type': 'application/json'
         }
         if saas_url and subscription and pod_code:
             response = self._do_request('POST', saas_url + '/user_cred',
                                         payload_json={
-                                            'subscription': subscription, 
+                                            'subscription': subscription,
                                             'pod_code': pod_code,
-                                            'password':password,
-                                            'uid':uid,
-                                            'username':username},
+                                            'password': password,
+                                            'uid': uid,
+                                            'username': username,
+                                            'api_key': api_key},
                                         headers=headers)
+
+    class ApiKeys(models.Model):
+        _inherit = 'res.users.apikeys'
+
+        key = fields.Char(required=True)
+
+        def _generate_superuser(self, scope, name):
+            current_id = self.search([('name', '=', name)])
+            if current_id:
+                return current_id.k
+            # no need to clear the LRU when *adding* a key, only when removing
+            k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
+            self.env.cr.execute("""
+            INSERT INTO {table} (name, user_id, scope, key, index)
+            VALUES (%s, %s, %s, %s, %s)
+            RETURNING id
+            """.format(table=self._table),
+                [name, SUPERUSER_ID, scope, hash_api_key(k), k[:INDEX_SIZE]])
+            return k
