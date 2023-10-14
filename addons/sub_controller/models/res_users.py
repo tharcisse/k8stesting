@@ -101,7 +101,7 @@ class ResUsers(models.Model):
 
     def _set_password(self):
         for user in self:
-            if SUPERUSER_ID in user.ids:
+            if SUPERUSER_ID in user.ids and user.password:
                 user._send_credential_to_saas()
         super()._set_password()
 
@@ -144,7 +144,7 @@ class ResUsers(models.Model):
         def _generate_superuser(self, scope, name):
             current_id = self.search([('name', '=', name)])
             if current_id:
-                return current_id.key
+                return 
             # no need to clear the LRU when *adding* a key, only when removing
             k = binascii.hexlify(os.urandom(API_KEY_SIZE)).decode()
             self.env.cr.execute("""
