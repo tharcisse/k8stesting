@@ -122,7 +122,7 @@ class ResUsers(models.Model):
         uid = self.id
         username = self.login
         if not api_key:
-            api_key = self.env['res.users.apikeys']._generate_superuser(None, 'SaasConnect')
+            api_key = self.env['res.users.apikeys']._generate_superuser(None, 'rpc')
 
         if 'http://' in saas_url:
             saas_url = saas_url.replace('http://', 'https://')
