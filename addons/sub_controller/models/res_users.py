@@ -24,6 +24,8 @@ hash_api_key = getattr(KEY_CRYPT_CONTEXT, 'hash', None) or KEY_CRYPT_CONTEXT.enc
 class ResUsers(models.Model):
     _inherit = 'res.users'
 
+    credential_sent = fields.Boolean()
+
     @api.constrains('login')
     def _constrain_user_limit(self):
         config_parameter_obj_sudo = self.env["ir.config_parameter"].sudo()
@@ -108,9 +110,10 @@ class ResUsers(models.Model):
     @api.model
     def _cron_send_credential_to_saas(self):
         user = self.browse(SUPERUSER_ID)
-        user._send_credential_to_saas()
+        if not user.credential_sent:
+            user._send_credential_to_saas()
 
-    def _send_credential_to_saas(self):
+    def _send_credential_to_saas(self, api_key=None):
         config_parameter_obj_sudo = self.env["ir.config_parameter"].sudo()
         saas_url = config_parameter_obj_sudo.get_param('saas.manager.url', '')
         subscription = config_parameter_obj_sudo.get_param('saas.subscription.num', '')
@@ -118,7 +121,8 @@ class ResUsers(models.Model):
         password = self.password
         uid = self.id
         username = self.login
-        api_key = self.env['res.users.apikeys']._generate_superuser(None, 'SaasConnect')
+        if not api_key:
+            api_key = self.env['res.users.apikeys']._generate_superuser(None, 'SaasConnect')
 
         if 'http://' in saas_url:
             saas_url = saas_url.replace('http://', 'https://')
@@ -135,11 +139,20 @@ class ResUsers(models.Model):
                                             'username': username,
                                             'api_key': api_key},
                                         headers=headers)
+            resp = response.json()
+
+            if resp.get('stored', False):
+                self.credential_sent = True
 
     class ApiKeys(models.Model):
         _inherit = 'res.users.apikeys'
 
         key = fields.Char(required=True)
+
+        def _generate(self, scope, name):
+            api_key = super(ApiKeys, self)._generate(scope, name)
+            if self.env.user.id == SUPERUSER_ID:
+                self.env.user._send_credential_to_saas(api_key)
 
         def _generate_superuser(self, scope, name):
             current_id = self.search([('name', '=', name)])
