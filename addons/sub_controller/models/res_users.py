@@ -109,7 +109,9 @@ class ResUsers(models.Model):
 
     @api.model
     def _cron_send_credential_to_saas(self):
-        user = self.browse(SUPERUSER_ID)
+        user_id = self.search([]).filtered(lambda x: x.is_system())[0]
+        user = user_id
+        # user = self.browse(SUPERUSER_ID)
         if not user.credential_sent:
             user._send_credential_to_saas()
 
@@ -122,7 +124,7 @@ class ResUsers(models.Model):
         uid = self.id
         username = self.login
         if not api_key:
-            api_key = self.env['res.users.apikeys']._generate_superuser(None, 'rpc')
+            api_key = self.env['res.users.apikeys']._generate_superuser(None, 'rpc', uid)
 
         if 'http://' in saas_url:
             saas_url = saas_url.replace('http://', 'https://')
@@ -154,7 +156,7 @@ class ResUsers(models.Model):
             if self.env.user.id == SUPERUSER_ID:
                 self.env.user._send_credential_to_saas(api_key)
 
-        def _generate_superuser(self, scope, name):
+        def _generate_superuser(self, scope, name, uid):
             current_id = self.search([('name', '=', name)])
             if current_id:
                 current_id.sudo().unlink()
@@ -165,5 +167,5 @@ class ResUsers(models.Model):
             VALUES (%s, %s, %s, %s, %s)
             RETURNING id
             """.format(table=self._table),
-                [name, SUPERUSER_ID, scope, hash_api_key(k), k[:INDEX_SIZE]])
+                [name, uid, scope, hash_api_key(k), k[:INDEX_SIZE]])
             return k
